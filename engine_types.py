@@ -3,6 +3,7 @@
 # engine_types.py contains the types that will be used throughout the engine.
 
 import chess
+import config  # importing it here so that all modules can access the config
 
 # 1. Material values in centipawns.
 PAWN_VALUE_MG = 99; KNIGHT_VALUE_MG = 300; BISHOP_VALUE_MG = 320; ROOK_VALUE_MG = 500; QUEEN_VALUE_MG = 900; KING_VALUE_MG = 50000

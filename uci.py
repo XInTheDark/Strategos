@@ -27,8 +27,8 @@ def uci():
     while True:
         command = input()
         if command == "uci":
-            print("id name Strategos")
-            print("id author Muzhen J")
+            print(f"id name {config.ENGINE_NAME}")
+            print(f"id author {config.ENGINE_AUTHOR}")
             print("uciok")
         elif command == "isready":
             print("readyok")

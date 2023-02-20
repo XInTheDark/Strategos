@@ -1,4 +1,3 @@
-#!/opt/homebrew/bin/python3
 # Strategos chess engine, written in Python.
 
 # main.py contains the main function for the engine.

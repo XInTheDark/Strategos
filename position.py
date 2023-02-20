@@ -51,8 +51,21 @@ class Position:
             return MIDDLEGAME
         
     def pawn_passed(self) -> bool:
-        # check if there is a passed pawn.
-        # TODO: implement this
+        # implemented in pieces.py!
         pass
     
+    def all_pieces(self):
+        """Returns a list of all pieces on the board."""
+        pieces = []
+        
+        for color in [chess.WHITE, chess.BLACK]:
+            for piece_type in PIECE_TYPES:
+                for piece in self.board.chess_board().pieces(piece_type=piece_type, color=color):
+                    pieces.append(piece)
+        
+        return pieces
+    
+    def count_all_pieces(self):
+        """Returns the number of pieces on the board."""
+        return len(self.all_pieces())
     

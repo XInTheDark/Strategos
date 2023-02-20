@@ -19,6 +19,9 @@ def prune(pos: position.Position, move: chess.Move, alpha: int, beta: int, side_
     """Prune the search tree."""
     global killers
     
+    if abs(evaluate.evaluate(pos, side_to_move)) > 750:
+        return False
+    
     if eval_psqt.eval_psqt_single(move.to_square, pos.board.chess_board().piece_at(move.from_square).piece_type, side_to_move, pos.game_phase()) < 0:
         killers.append(move)
         return True
@@ -51,22 +54,33 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
             # do we need to stop searching?
             # (either a `stop` command was received, or we've reached the allocated time)
             if stop_search.search_has_stopped():
-                return max_score, best_move
+                return best_score, best_move
             
-            # TODO: implement pruning
+            # search for checkmate and stalemate first
+            if pos.board.chess_board().is_checkmate():
+                best_score = VALUE_MATE - depth; best_move = move
+                return VALUE_MATE + depth, move
+            elif pos.board.chess_board().is_stalemate() and best_score < VALUE_DRAW:
+                best_score = VALUE_DRAW; best_move = move
+                return VALUE_DRAW, move
+            
+            # TODO: implement proper pruning
             if prune(pos, move, alpha, beta, side_to_move, depth):
                 continue
             
             pos.board.chess_board().push(move)
             nodes += 1
             score, _ = search(pos, depth - 1, alpha, beta, chess.BLACK)
+            score = -score
             pos.board.chess_board().pop()
         
             if score > max_score:
                 max_score = best_score = score
                 best_move = move
         
+            beta = (alpha + beta) // 2  # resize the window
             alpha = max(alpha, max_score)
+            
             if beta <= alpha:
                 break
     
@@ -78,7 +92,15 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
             # do we need to stop searching?
             # (either a `stop` command was received, or we've reached the allocated time)
             if stop_search.search_has_stopped():
-                return min_score, best_move
+                return best_score, best_move
+            
+            # search for checkmate and stalemate
+            if pos.board.chess_board().is_checkmate():
+                best_score = -(VALUE_MATE + depth); best_move = move
+                return -(VALUE_MATE + depth), move
+            elif pos.board.chess_board().is_stalemate() and best_score > VALUE_DRAW:
+                best_score = VALUE_DRAW; best_move = move
+                return VALUE_DRAW, move
             
             if prune(pos, move, alpha, beta, side_to_move, depth):
                 continue
@@ -86,6 +108,7 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
             pos.board.chess_board().push(move)
             nodes += 1
             score, _ = search(pos, depth - 1, alpha, beta, chess.WHITE)
+            score = -score
             pos.board.chess_board().pop()
         
             if score < min_score:
@@ -93,6 +116,8 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
                 best_move = move
         
             beta = min(beta, min_score)
+            alpha = (alpha + beta) // 2  # resize the window
+            
             if beta <= alpha:
                 break
     
@@ -111,16 +136,23 @@ def iterative_deepening(pos: position.Position, max_depth: int, side_to_move: ch
             best_move = uci.move_to_uci(best_move)
         
         t = int((time.time() - starttime) * 1000)
-        print(f"info depth {depth} seldepth {depth} multipv 1 score cp {score} nodes {nodes} nps 0 hashfull 0 tbhits 0 time {t} pv {best_move}\n"
-              )  # TODO: fix UCI output (including proper nodes count, nps, time and pv)
+        s = f"info depth {depth} seldepth {depth} multipv 1 score cp {score} nodes {nodes} nps 0 hashfull 0 tbhits 0 time {t} pv {best_move}\n"
+        
+        # special case: mate in x
+        if score > VALUE_MATE:
+            s = s.replace(f"cp {score}", f"mate {score - VALUE_MATE}")
+        elif score < -VALUE_MATE:
+            s = s.replace(f"cp {score}", f"mate -{abs(score) - VALUE_MATE}")
+        
+        print(s)  # TODO: fix UCI output (including proper nodes count, nps, time and pv)
         
         if stop_search.search_has_stopped():
             # search has stopped, output final bestmove
             print(f"bestmove {best_move} ponder 0000")  # we print ponder as well, even though we don't support it
             break
             
-        # sometimes we skip a depth
-        if depth < 6 and abs(evaluate.evaluate(pos, side_to_move)) < 100:
+        # sometimes we increase a depth if the score is extremely high
+        if depth < 6 and abs(evaluate.evaluate(pos, side_to_move)) > 500:
             depth += 1
             
     print(f"bestmove {best_move} ponder 0000")
