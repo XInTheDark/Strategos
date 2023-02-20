@@ -9,7 +9,7 @@ def pawn_passed(pos: position.Position, pawn: chess.Square, side_to_move: chess.
     RANK = chess.square_rank(pawn)
     
     # if the pawn is on the 7th rank, it is passed without needing to check
-    if RANK == 7-1:
+    if RANK == (7-1 if side_to_move == chess.WHITE else 0+1):
         return True
     
     # if there are no enemy pawns on the same file, or on the two adjacent files, the pawn is passed
