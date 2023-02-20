@@ -2,9 +2,15 @@
 
 # uci.py contains the UCI interface for the engine.
 
-import chess
+try:
+    import chess
+except ModuleNotFoundError:
+    import os
+    os.system("pip3 install python-chess")
+    import chess
+    
 import position
-import search
+import search, stop_search
 from engine_types import *
 
 def move_to_uci(move: chess.Move):
@@ -44,10 +50,29 @@ def uci():
             fen = command.split(" ")[2]
             pos = position.Position(fen)
         elif command.startswith("go"):
-            if command.split(" ").__len__() > 1 and command.split(" ")[1].split("=")[0] == "depth":
-                depth = int(command.split(" ")[1].split("=")[1])
+            if command.split(" ").__len__() > 1 and command.split(" ")[1] == "movetime":
+                movetime = int(command.split(" ")[2])
+            else:
+                movetime = None
+                
+            if command.split(" ").__len__() > 1 and command.split(" ")[1] == "depth":
+                depth = int(command.split(" ")[2])
             else:
                 depth = MAX_DEPTH
-            search.iterative_deepening(pos, depth, pos.board.chess_board().turn)
-        elif command == "quit" or command == "stop":
+                
+            if command.split(" ").__len__() > 1 and command.split(" ")[1] == "infinite":
+                depth = MAX_DEPTH
+                movetime = None
+            
+            # we do not support time controls yet.
+            # we also do not support pondering.
+            # nodes and mate may be added in the future.
+            
+            search.iterative_deepening(pos, depth, pos.board.chess_board().turn, movetime)
+            
+        elif command == "quit":
             break
+        elif command == "stop":
+            # when this command is issued, we must stop searching immediately
+            # and return the best move found so far ("bestmove" output).
+            stop_search.stop_search()
