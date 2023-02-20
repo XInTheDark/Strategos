@@ -136,7 +136,7 @@ def iterative_deepening(pos: position.Position, max_depth: int, side_to_move: ch
             best_move = uci.move_to_uci(best_move)
         
         t = int((time.time() - starttime) * 1000)
-        s = f"info depth {depth} seldepth {depth} multipv 1 score cp {score} nodes {nodes} nps 0 hashfull 0 tbhits 0 time {t} pv {best_move}\n"
+        s = f"info depth {depth} seldepth {depth} multipv 1 score cp {score} nodes {nodes} nps {1000 * nodes // t} hashfull 0 tbhits 0 time {t} pv {best_move}\n"
         
         # special case: mate in x
         if score > VALUE_MATE:
@@ -144,7 +144,7 @@ def iterative_deepening(pos: position.Position, max_depth: int, side_to_move: ch
         elif score < -VALUE_MATE:
             s = s.replace(f"cp {score}", f"mate -{abs(score) - VALUE_MATE}")
         
-        print(s)  # TODO: fix UCI output (including proper nodes count, nps, time and pv)
+        print(s)  # TODO: Add proper pv output
         
         if stop_search.search_has_stopped():
             # search has stopped, output final bestmove
