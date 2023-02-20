@@ -17,7 +17,8 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
     materialEval = US_MATERIAL - THEM_MATERIAL
     
     # Step 2. Piece-square bonuses.
-    psqtEval = eval_psqt.eval_psqt(pos, side_to_move, pos.game_phase())
+    psqtEval = eval_psqt.eval_psqt(pos, side_to_move, pos.game_phase()) \
+               - eval_psqt.eval_psqt(pos, not side_to_move, pos.game_phase())
     
     # Step 3. Pawn structure evaluation.
     # TODO

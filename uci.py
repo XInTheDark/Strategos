@@ -34,20 +34,20 @@ def uci():
             moves = command.split(" ")[3:]
             for move in moves:
                 pos.board.chess_board().push(uci_to_move(move))
-        elif command.startswith("position fen"):
-            fen = command.split(" ")[2]
-            pos = position.Position(fen)
         elif command.startswith("position fen moves"):
             fen = command.split(" ")[2]
             moves = command.split(" ")[4:]
             pos = position.Position(fen)
             for move in moves:
                 pos.board.chess_board().push(uci_to_move(move))
+        elif command.startswith("position fen"):
+            fen = command.split(" ")[2]
+            pos = position.Position(fen)
         elif command.startswith("go"):
             if command.split(" ").__len__() > 1 and command.split(" ")[1].split("=")[0] == "depth":
                 depth = int(command.split(" ")[1].split("=")[1])
             else:
                 depth = MAX_DEPTH
             search.iterative_deepening(pos, depth, pos.board.chess_board().turn)
-        elif command == "quit":
+        elif command == "quit" or command == "stop":
             break
