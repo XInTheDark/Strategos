@@ -47,10 +47,17 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
     v = materialEval + psqtEval + hangingEval
     
     # Step 4. Bonus for passed pawns.
-    for pawn in board.pieces(chess.PAWN, side_to_move):
-        if pieces.pawn_passed(pos, pawn, side_to_move):
-            # The more advanced the pawn is, the more valuable it is.
-            v += 100 * chess.square_rank(pawn) if side_to_move == chess.WHITE\
-                else 100 * (7 - chess.square_rank(pawn))
+    if pos.game_phase() == ENDGAME:
+        for pawn in board.pieces(chess.PAWN, side_to_move):
+            if pieces.pawn_passed(pos, pawn, side_to_move):
+                # The more advanced the pawn is, the more valuable it is.
+                v += 100 * chess.square_rank(pawn) if side_to_move == chess.WHITE\
+                    else 100 * (7 - chess.square_rank(pawn))
+                
+        # similarly do the same for the enemy pawns, but subtract the value
+        for pawn in board.pieces(chess.PAWN, not side_to_move):
+            if pieces.pawn_passed(pos, pawn, not side_to_move):
+                v -= 100 * (7 - chess.square_rank(pawn)) if side_to_move == chess.WHITE\
+                    else 100 * chess.square_rank(pawn)
     
     return v
