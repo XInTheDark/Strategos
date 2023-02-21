@@ -35,7 +35,7 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
                 capturedPieceV = material_(board.piece_at(move.to_square).piece_type, pos.game_phase())
             except AttributeError:
                 continue
-            if capturedPieceV > capturingPieceV or board.attackers(not side_to_move, move.to_square).__len__() <= 1:
+            if capturedPieceV > capturingPieceV or board.attackers(not side_to_move, move.to_square).__len__() == 0:
                 hangingEval += capturedPieceV - capturingPieceV
                 
                 # additionally, if the capturingPiece is a pawn, we add a large bonus
@@ -61,7 +61,7 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
             except AttributeError:
                 continue
                 
-            if capturedPieceV > capturingPieceV:
+            if capturedPieceV > capturingPieceV or board.attackers(side_to_move, move.to_square).__len__() == 0:
                 hangingEval -= capturedPieceV - capturingPieceV
                 
                 # additionally, if the capturingPiece is a pawn, we add a large bonus

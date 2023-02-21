@@ -27,14 +27,14 @@ def prune(pos: position.Position, move: chess.Move, alpha: int, beta: int, side_
     #     if evaluate.see_eval(pos, side_to_move, move) < -50:
     #         return True
     
-    if eval_psqt.eval_psqt_single(move.to_square, pos.board.chess_board().piece_at(move.from_square).piece_type, side_to_move, pos.game_phase()) < -50:
-        killers.append(move)
-        return True
-    
     pos.board.chess_board().push(move)
     e = evaluate.evaluate(pos, side_to_move)
     pos.board.chess_board().pop()
     if e < alpha - 200 and abs(e) < 500:
+        killers.append(move)
+        return True
+    
+    if depth <= 3 and move in killers:
         return True
     
     
@@ -45,7 +45,7 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
     
     if depth == 0 or pos.board.chess_board().is_game_over():
         nodes += 1
-        return evaluate.evaluate(pos, side_to_move), None
+        return evaluate.evaluate(pos, side_to_move), best_move
 
     if side_to_move == chess.WHITE:
         max_score = -VALUE_INF
