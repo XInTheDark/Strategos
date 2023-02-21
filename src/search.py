@@ -149,6 +149,7 @@ def iterative_deepening(pos: position.Position, max_depth: int, side_to_move: ch
             best_move = uci.move_to_uci(best_move)
         
         t = int((time.time() - starttime) * 1000)
+        score = round(score)
         s = f"info depth {depth} seldepth {depth} multipv 1 score cp {score} nodes {nodes} nps {1000 * nodes // t if t else 0} hashfull 0 tbhits 0 time {t} pv {best_move}"
         
         # special case: mate in x
