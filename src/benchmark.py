@@ -5,8 +5,6 @@
 
 import time
 
-import config
-import uci
 import position
 import search
 from engine_types import *

@@ -1,5 +1,4 @@
 # Strategos chess engine, written in Python.
-import chess
 
 # eval_psqt.py contains the piece-square tables for knight, bishop, rook, queen, pawn and king.
 

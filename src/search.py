@@ -1,5 +1,4 @@
 # Strategos chess engine, written in Python.
-import chess
 # search.py contains the search function for the engine.
 
 import evaluate

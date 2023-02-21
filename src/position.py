@@ -1,5 +1,4 @@
 # Strategos chess engine, written in Python.
-import chess
 
 import bitboard
 from engine_types import *
