@@ -90,16 +90,28 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
                 v -= 100 * (7 - chess.square_rank(pawn)) if side_to_move == chess.WHITE\
                     else 100 * chess.square_rank(pawn)
     
-    # Step 5. Penalty for doubled pawns.
+    # Step 5. Penalty for doubled and isolated pawns.
     for side in [side_to_move, not side_to_move]:
         for pawn in pos.doubled_pawns(side):
             v += (15 if pos.game_phase() == MIDDLEGAME else 35) * (1 if side != side_to_move else -1)
     
-    # Step 6. Penalty for isolated pawns.
     for side in [side_to_move, not side_to_move]:
         for pawn in pos.isolated_pawns(side):
             v += (15 if pos.game_phase() == MIDDLEGAME else 60) * (1 if side != side_to_move else -1)
-            
+    
+    # Step 6. Penalty for pinned pieces, and bonus for pinning pieces.
+    for pieceType in PIECE_TYPES:
+        for piece in board.pieces(pieceType, side_to_move):
+            if board.is_pinned(side_to_move, piece):
+               v -= material_(pieceType, pos.game_phase()) / 3
+               if board.attackers(not side_to_move, piece).__len__() >= 1:
+                   v -= material_(pieceType, pos.game_phase()) / 2
+        for piece in board.pieces(pieceType, not side_to_move):
+            if board.is_pinned(not side_to_move, piece):
+                v += material_(pieceType, pos.game_phase()) / 3
+                if board.attackers(side_to_move, piece).__len__() >= 1:
+                    v += material_(pieceType, pos.game_phase()) / 2
+               
     return v
 
 
