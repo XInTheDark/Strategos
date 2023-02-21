@@ -89,18 +89,6 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
             if pieces.pawn_passed(pos, pawn, not side_to_move):
                 v -= 100 * (7 - chess.square_rank(pawn)) if side_to_move == chess.WHITE\
                     else 100 * chess.square_rank(pawn)
-                
-    # Step 5. Bonus for castling.
-    if board.has_kingside_castling_rights(side_to_move):
-        v += 10
-    if board.has_queenside_castling_rights(side_to_move):
-        v += 10
-    
-    # If opponent has castled, subtract a bonus.
-    if board.has_kingside_castling_rights(not side_to_move):
-        v -= 10
-    if board.has_queenside_castling_rights(not side_to_move):
-        v -= 10
         
     return v
 
