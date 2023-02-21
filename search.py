@@ -59,12 +59,12 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
             
             # search for checkmate and stalemate first
             if pos.board.chess_board().is_checkmate():
-                max_score = VALUE_MATE - depth
-                if root: best_move = move
+                max_score = best_score = VALUE_MATE + depth
+                best_move = move
                 return VALUE_MATE + depth, move
             elif pos.board.chess_board().is_stalemate() and max_score < VALUE_DRAW:
-                max_score = VALUE_DRAW
-                if root: best_move = move
+                max_score = best_score = VALUE_DRAW
+                best_move = move
                 return VALUE_DRAW, move
             
             # TODO: implement proper pruning
@@ -82,9 +82,8 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
                 if max_score > best_score:
                     bestMove = move
                 
-            if root:
+            if root and score > best_score:
                 best_move = bestMove
-                best_score = max_score
         
             beta = (alpha + beta) // 2
             alpha = max(alpha, max_score)
@@ -105,12 +104,12 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
             
             # search for checkmate and stalemate
             if pos.board.chess_board().is_checkmate():
-                min_score = -(VALUE_MATE + depth)
-                if root: best_move = move
+                min_score = best_score = -(VALUE_MATE + depth)
+                best_move = move
                 return -(VALUE_MATE + depth), move
             elif pos.board.chess_board().is_stalemate() and min_score > VALUE_DRAW:
-                min_score = VALUE_DRAW
-                if root: best_move = move
+                min_score = best_score = VALUE_DRAW
+                best_move = move
                 return VALUE_DRAW, move
             
             if prune(pos, move, alpha, beta, side_to_move, depth):
@@ -127,9 +126,8 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
                 if min_score < best_score or best_score == -VALUE_INF:
                     bestMove = move
                 
-            if root:
+            if root and min_score < best_score:
                 best_move = bestMove
-                best_score = min_score
         
             beta = (alpha + beta) // 2
             alpha = min(alpha, min_score)

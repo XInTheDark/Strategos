@@ -26,7 +26,6 @@ class Board:
         material = 0
         
         for pieceType in PIECE_TYPES:
-            if pieceType == chess.KING: continue
             for piece in self.chess_board().pieces(piece_type=pieceType, color=side_to_move):
                 material += material_(pieceType, phase)
         
