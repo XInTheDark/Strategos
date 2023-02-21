@@ -73,3 +73,30 @@ class Position:
         # checks if the moved piece has same color as side to move
         return self.board.chess_board().piece_at(move.from_square).color == self.side_to_move
     
+    def doubled_pawns(self, side_to_move: chess.Color):
+        """Returns a list of doubled pawns on the board for side to move."""
+        doubled_pawns = []
+        for pawn in self.board.chess_board().pieces(chess.PAWN, side_to_move):
+            for other_pawn in self.board.chess_board().pieces(chess.PAWN, side_to_move):
+                if pawn != other_pawn and chess.square_file(pawn) == chess.square_file(other_pawn):
+                    doubled_pawns.append(pawn)
+        
+        return doubled_pawns  # Note that each pair of doubled pawns will have 2 entries.
+    
+    def isolated_pawns(self, side_to_move: chess.Color):
+        """Returns a list of isolated pawns on the board for side to move."""
+        isolated_pawns = []
+        for pawn in self.board.chess_board().pieces(chess.PAWN, side_to_move):
+            isolated = True
+            for other_pawn in self.board.chess_board().pieces(chess.PAWN, side_to_move):
+                if pawn != other_pawn and chess.square_file(pawn) == chess.square_file(other_pawn) - 1:
+                    isolated = False
+                elif pawn != other_pawn and chess.square_file(pawn) == chess.square_file(other_pawn) + 1:
+                    isolated = False
+                elif pawn != other_pawn and chess.square_file(pawn) == chess.square_file(other_pawn):
+                    isolated = False
+                    
+            if isolated:
+                isolated_pawns.append(pawn)
+        
+        return isolated_pawns

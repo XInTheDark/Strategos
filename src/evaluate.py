@@ -89,7 +89,17 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
             if pieces.pawn_passed(pos, pawn, not side_to_move):
                 v -= 100 * (7 - chess.square_rank(pawn)) if side_to_move == chess.WHITE\
                     else 100 * chess.square_rank(pawn)
-        
+    
+    # Step 5. Penalty for doubled pawns.
+    for side in [side_to_move, not side_to_move]:
+        for pawn in pos.doubled_pawns(side):
+            v += (15 if pos.game_phase() == MIDDLEGAME else 35) * (1 if side != side_to_move else -1)
+    
+    # Step 6. Penalty for isolated pawns.
+    for side in [side_to_move, not side_to_move]:
+        for pawn in pos.isolated_pawns(side):
+            v += (15 if pos.game_phase() == MIDDLEGAME else 60) * (1 if side != side_to_move else -1)
+            
     return v
 
 
