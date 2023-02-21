@@ -14,22 +14,25 @@ killers = []
 
 best_score = -VALUE_INF
 best_move = None
-max_score = -VALUE_INF; min_score = VALUE_INF
+max_score = -VALUE_INF
+min_score = VALUE_INF
+
 
 def prune(pos: position.Position, move: chess.Move, alpha: int, beta: int, side_to_move: chess.Color, depth: int):
     """Prune the search tree."""
     global killers
     
-    if abs(evaluate.evaluate(pos, side_to_move)) > 750:
+    if abs(evaluate.evaluate(pos, side_to_move)) > 750:  # No pruning for high eval
         return False
     
-    # if pos.board.chess_board().is_capture(move):
-    #     if evaluate.see_eval(pos, side_to_move, move) < -50:
-    #         return True
+    if pos.board.chess_board().is_capture(move):
+        if evaluate.see_eval(pos, side_to_move, move) < -50:
+            return True
     
     pos.board.chess_board().push(move)
     e = evaluate.evaluate(pos, side_to_move)
     pos.board.chess_board().pop()
+    
     if e < alpha - 200 and abs(e) < 500:
         killers.append(move)
         return True
@@ -39,104 +42,55 @@ def prune(pos: position.Position, move: chess.Move, alpha: int, beta: int, side_
     
     
 def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_move: chess.Color, root: bool = False):
-    global nodes, best_score, best_move, max_score, min_score
+    global nodes, best_score, best_move, max_score, min_score, killers
     bestMove = None
     """Search the position to a given depth."""
     
     if depth == 0 or pos.board.chess_board().is_game_over():
         nodes += 1
         return evaluate.evaluate(pos, side_to_move), best_move
-
-    if side_to_move == chess.WHITE:
-        max_score = -VALUE_INF
-        for move in list(pos.board.chess_board().legal_moves):
-            if bestMove is None: bestMove = move
-            # do we need to stop searching?
-            # (either a `stop` command was received, or we've reached the allocated time)
-            if stop_search.search_has_stopped():
-                return best_score, best_move
-            
-            # search for checkmate and stalemate first
-            if pos.board.chess_board().is_checkmate():
-                max_score = best_score = VALUE_MATE + depth
-                best_move = move
-                return VALUE_MATE + depth, move
-            elif pos.board.chess_board().is_stalemate() and max_score < VALUE_DRAW:
-                max_score = best_score = VALUE_DRAW
-                best_move = move
-                return VALUE_DRAW, move
-            
-            # TODO: implement proper pruning
-            if prune(pos, move, alpha, beta, side_to_move, depth):
-                continue
-            
-            pos.board.chess_board().push(move)
-            nodes += 1
-            score, _ = search(pos, depth - 1, alpha, beta, chess.BLACK)
-            score = -score
-            pos.board.chess_board().pop()
+    
+    for move in pos.board.chess_board().legal_moves:
+        if stop_search.search_has_stopped():
+            return best_score, best_move
         
-            if score > max_score:
-                max_score = score
-                if max_score > best_score:
-                    bestMove = move
-                
-            if root and score > best_score:
+        if prune(pos, move, alpha, beta, side_to_move, depth):
+            continue
+            
+        pos.board.chess_board().push(move)
+        # check for checkmate
+        if pos.board.chess_board().is_checkmate():
+            return VALUE_MATE + depth, move
+        # check for stalemate
+        if pos.board.chess_board().is_stalemate():
+            return VALUE_DRAW, move
+        
+        score, _ = search(pos, depth - 1, -beta, -alpha, not side_to_move, root=False)
+        score = -score
+        pos.board.chess_board().pop()
+        
+        if score > best_score:
+            best_score = score
+            best_move = move
+        
+        if score > max_score:
+            max_score = score
+        if score < min_score:
+            min_score = score
+        
+        if score > alpha:
+            alpha = score
+            bestMove = move
+            if score >= beta:
                 best_move = bestMove
+                return beta, bestMove
+        else:
+            killers.append(move)
         
-            beta = (alpha + beta) // 2
-            alpha = max(alpha, max_score)
-            
-            if beta <= alpha:
-                break
+    return alpha, bestMove
     
-        return max_score, bestMove
     
-    else: # side_to_move == chess.BLACK
-        min_score = float('inf')
-        for move in list(pos.board.chess_board().legal_moves):
-            if bestMove is None: bestMove = move
-            # do we need to stop searching?
-            # (either a `stop` command was received, or we've reached the allocated time)
-            if stop_search.search_has_stopped():
-                return min_score, best_move
-            
-            # search for checkmate and stalemate
-            if pos.board.chess_board().is_checkmate():
-                min_score = best_score = -(VALUE_MATE + depth)
-                best_move = move
-                return -(VALUE_MATE + depth), move
-            elif pos.board.chess_board().is_stalemate() and min_score > VALUE_DRAW:
-                min_score = best_score = VALUE_DRAW
-                best_move = move
-                return VALUE_DRAW, move
-            
-            if prune(pos, move, alpha, beta, side_to_move, depth):
-                continue
-                
-            pos.board.chess_board().push(move)
-            nodes += 1
-            score, _ = search(pos, depth - 1, alpha, beta, chess.WHITE)
-            score = -score
-            pos.board.chess_board().pop()
-        
-            if score < min_score:
-                min_score = score
-                if min_score < best_score or best_score == -VALUE_INF:
-                    bestMove = move
-                
-            if root and min_score < best_score:
-                best_move = bestMove
-        
-            beta = (alpha + beta) // 2
-            alpha = min(alpha, min_score)
-            
-            if beta <= alpha:
-                break
-    
-        return min_score, bestMove
-    
-def iterative_deepening(pos: position.Position, max_depth: int, side_to_move: chess.Color, move_time: int=None):
+def iterative_deepening(pos: position.Position, max_depth: int, side_to_move: chess.Color, move_time: int = None):
     import time
     starttime = time.time()
     if move_time is not None:
