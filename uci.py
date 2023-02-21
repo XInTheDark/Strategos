@@ -12,6 +12,7 @@ except ModuleNotFoundError:
 import position
 import search, stop_search
 from engine_types import *
+import benchmark
 
 def move_to_uci(move: chess.Move):
     """Convert a chess.Move object to a UCI string."""
@@ -23,6 +24,7 @@ def uci_to_move(uci: str):
 
 def uci():
     """Start the UCI interface."""
+    print("Strategos chess engine by Muzhen J")
     pos = position.Position()
     while True:
         command = input()
@@ -37,12 +39,12 @@ def uci():
         elif command == "position startpos":
             pos = position.Position()
         elif command.startswith("position startpos moves"):
-            moves = command.split(" ")[3:]
+            moves = command.split("position startpos moves ")[1].split(" ")
             for move in moves:
                 pos.board.chess_board().push(uci_to_move(move))
-        elif command.startswith("position fen moves"):
+        elif command.startswith("position fen") and "moves" in command:
             fen = command.split(" ")[2]
-            moves = command.split(" ")[4:]
+            moves = command.split("moves ")[1].split(" ")
             pos = position.Position(fen)
             for move in moves:
                 pos.board.chess_board().push(uci_to_move(move))
@@ -68,7 +70,7 @@ def uci():
             # we also do not support pondering.
             # nodes and mate may be added in the future.
             
-            search.iterative_deepening(pos, depth, pos.board.chess_board().turn, movetime)
+            search.iterative_deepening(pos, depth, pos.side_to_move, movetime)
             
         elif command == "quit":
             break
@@ -76,3 +78,5 @@ def uci():
             # when this command is issued, we must stop searching immediately
             # and return the best move found so far ("bestmove" output).
             stop_search.stop_search()
+        elif command == "bench":
+            benchmark.benchmark()

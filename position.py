@@ -30,7 +30,7 @@ class Position:
                             chess_board.has_kingside_castling_rights(chess.BLACK),
                             chess_board.has_queenside_castling_rights(chess.BLACK)]
         
-        self.game_ply = chess_board.fullmove_number
+        self.game_ply = chess_board.ply()
         self.side_to_move = chess_board.turn
         
     def fen(self):
@@ -68,4 +68,9 @@ class Position:
     def count_all_pieces(self):
         """Returns the number of pieces on the board."""
         return len(self.all_pieces())
+    
+    def move_is_stm(self, move: chess.Move):
+        # assumes that the move is in pos.board.chess_board().legal_moves
+        # checks if the moved piece has same color as side to move
+        return self.board.chess_board().piece_at(move.from_square).color == self.side_to_move
     
