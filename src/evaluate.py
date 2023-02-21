@@ -111,7 +111,14 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
                 v += material_(pieceType, pos.game_phase()) / 3
                 if board.attackers(side_to_move, piece).__len__() >= 1:
                     v += material_(pieceType, pos.game_phase()) / 2
-               
+    
+    # Step 7. Bonus for attacking a piece multiple times
+    for color in [side_to_move, not side_to_move]:
+        for pieceType in PIECE_TYPES:
+            for piece in board.pieces(pieceType, not color):
+                if board.attackers(color, piece).__len__() >= 2:
+                    v += material_(pieceType, pos.game_phase()) / 4 * (1 if color == side_to_move else -1)
+                    
     return v
 
 
