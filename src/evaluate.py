@@ -106,14 +106,14 @@ def evaluate(pos: position.Position, side_to_move: chess.Color):
         for pieceType in PIECE_TYPES:
             for piece in board.pieces(pieceType, side_to_move):
                 if board.is_pinned(side_to_move, piece):
-                   v -= material_(pieceType, pos.game_phase()) / 3
+                   v -= material_(pieceType, pos.game_phase()) / 10
                    if board.attackers(not side_to_move, piece).__len__() >= 1:
-                       v -= material_(pieceType, pos.game_phase()) / 2
+                       v -= material_(pieceType, pos.game_phase()) / 7
             for piece in board.pieces(pieceType, not side_to_move):
                 if board.is_pinned(not side_to_move, piece):
-                    v += material_(pieceType, pos.game_phase()) / 3
+                    v += material_(pieceType, pos.game_phase()) / 10
                     if board.attackers(side_to_move, piece).__len__() >= 1:
-                        v += material_(pieceType, pos.game_phase()) / 2
+                        v += material_(pieceType, pos.game_phase()) / 7
     
         # Step 7. Bonus for attacking a piece multiple times
         for color in [side_to_move, not side_to_move]:
