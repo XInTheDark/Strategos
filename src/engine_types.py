@@ -21,6 +21,9 @@ VALUE_INF = 1000000; VALUE_MATE = 10000001; VALUE_MATED = -10000001; VALUE_DRAW 
 # 5. Depth
 MAX_DEPTH = 64
 
+# 6. FENs
+STARTPOS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
 def material_(piece, phase=MIDDLEGAME):
     """Return the material value of a piece, in middlegame/endgame values depending on the phase."""
     if phase == MIDDLEGAME:

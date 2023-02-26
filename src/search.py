@@ -29,15 +29,15 @@ def prune(pos: position.Position, move: chess.Move, alpha: int, beta: int, side_
         if evaluate.see_eval(pos, side_to_move, move) < -50:
             return True
     
+    if depth <= 3 and move in killers:
+        return True
+    
     pos.board.chess_board().push(move)
     e = evaluate.evaluate(pos, side_to_move)
     pos.board.chess_board().pop()
     
     if e < alpha - 200 and abs(e) < 500:
         killers.append(move)
-        return True
-    
-    if depth <= 3 and move in killers:
         return True
     
     
@@ -60,9 +60,11 @@ def search(pos: position.Position, depth: int, alpha: int, beta: int, side_to_mo
         pos.board.chess_board().push(move)
         # check for checkmate
         if pos.board.chess_board().is_checkmate():
+            pos.board.chess_board().pop()
             return VALUE_MATE + depth, move
         # check for stalemate
         if pos.board.chess_board().is_stalemate():
+            pos.board.chess_board().pop()
             return VALUE_DRAW, move
         
         score, _ = search(pos, depth - 1, -beta, -alpha, not side_to_move, root=False)
@@ -117,7 +119,7 @@ def iterative_deepening(pos: position.Position, max_depth: int, side_to_move: ch
         if stop_search.search_has_stopped():
             # search has stopped, output final bestmove
             print(f"bestmove {best_move} ponder 0000")  # we print ponder as well, even though we don't support it
-            break
+            return
             
         # sometimes we increase a depth if the score is extremely high
         if depth < 6 and abs(evaluate.evaluate(pos, side_to_move)) > 500:
