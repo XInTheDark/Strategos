@@ -148,7 +148,6 @@ def see_eval(pos: position.Position, side_to_move: chess.Color, capture: chess.M
     pos.board.chess_board().pop()
     
     if e > 0:
-        pos.board.chess_board().pop()
         return capturedV - capturingV
     else:
         return capturedV - capturingV + e  # penalty for negative eval after capture
